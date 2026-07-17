@@ -132,6 +132,7 @@ flowchart LR
 | **Регистрация на событие** | Client → Promotion → Commerce | Запрос-ответ | Средняя | < 1 с | Client | Promotion, Commerce |
 | **Участие в челлендже** | Client → Competition → Training | Запрос-ответ | Средняя | < 500 мс | Client | Competition, Training |
 
+```mermaid
 erDiagram
     %% Домен Identity
     USER ||--|| PROFILE : has
