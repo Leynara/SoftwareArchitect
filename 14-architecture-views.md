@@ -564,6 +564,46 @@ erDiagram
 | **All domains** | Graceful Degradation | Отключение некритичных функций (Recommendation при перегрузке) | При превышении 80% ёмкости |
 
 ---
+```mermaid
+sequenceDiagram
+    participant App as Mobile App
+    participant API as API Gateway
+    participant Training as Training Service
+    participant DB as Training DB
+    participant Outbox as Outbox
+    participant Bus as Event Bus
+    participant Analytics as Analytics Service
+    participant Game as Gamification Service
+    participant Notify as Notification Service
+    participant Feed as Activity Feed Service
+
+    App->>API: Submit workout
+    API->>Training: Save workout request
+    Training->>Training: Validate + idempotency check
+    Training->>DB: Persist workout
+    Training->>Outbox: Save training.completed event
+    Training-->>API: Success response
+    API-->>App: Workout saved
+
+    Outbox->>Bus: Publish training.completed
+
+    par Async processing
+        Bus-->>Analytics: training.completed
+        Analytics->>Analytics: Update aggregates
+    and
+        Bus-->>Game: training.completed
+        Game->>Game: Check achievements
+    and
+        Bus-->>Feed: training.completed
+        Feed->>Feed: Update activity feed
+    and
+        Bus-->>Notify: training.completed / achievement
+        Notify-->>App: Push notification
+    end
+
+---
+
+---
 
 ## 4. Инфраструктурное представление (Infrastructure View)
 
