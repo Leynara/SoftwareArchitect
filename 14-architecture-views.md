@@ -603,79 +603,113 @@ sequenceDiagram
 ---
 ## 4. Инфраструктурное представление (Infrastructure View)
 
-
-
-
-
----
-
-# 14.3. Представление многозадачности / concurrency
-
-Это представление показывает, как система справляется с параллельными запросами, асинхронными процессами и пиковыми нагрузками.
-
-## Основные источники параллелизма
-- одновременная запись тренировок;
-- массовые соревнования;
-- рассылка уведомлений;
-- обновление лент активности;
-- пересчёт достижений;
-- загрузка данных с устройств.
-
-## Основные паттерны
-
-### 1. Idempotency
-Повторная отправка тренировки не должна создавать дубликат.
-
-### 2. Outbox Pattern
-Если сервис сохранил тренировку, событие о ней не должно потеряться.
-
-### 3. Retry + DLQ
-Ошибочные события не теряются, а попадают в отдельную очередь.
-
-### 4. CQRS для тяжёлых read-сценариев
-Leaderboard и аналитика читаются из подготовленных моделей.
-
-### 5. Backpressure
-При пиках система ограничивает скорость обработки, чтобы не упасть полностью.
+### 4.1. Инфраструктурная схема развертывания
 
 ```mermaid
-sequenceDiagram
-    participant App as Mobile App
-    participant API as API Gateway
-    participant Training as Training Service
-    participant DB as Training DB
-    participant Outbox as Outbox
-    participant Bus as Event Bus
-    participant Analytics as Analytics Service
-    participant Game as Gamification Service
-    participant Notify as Notification Service
-    participant Feed as Activity Feed Service
-
-    App->>API: Submit workout
-    API->>Training: Save workout request
-    Training->>Training: Validate + idempotency check
-    Training->>DB: Persist workout
-    Training->>Outbox: Save training.completed event
-    Training-->>API: Success response
-    API-->>App: Workout saved
-
-    Outbox->>Bus: Publish training.completed
-
-    par Async processing
-        Bus-->>Analytics: training.completed
-        Analytics->>Analytics: Update aggregates
-    and
-        Bus-->>Game: training.completed
-        Game->>Game: Check achievements
-    and
-        Bus-->>Feed: training.completed
-        Feed->>Feed: Update activity feed
-    and
-        Bus-->>Notify: training.completed / achievement
-        Notify-->>App: Push notification
+flowchart TB
+    %% Клиентский слой
+    subgraph ClientLayer[Клиентский слой]
+        iOS[Мобильное приложение iOS]
+        Android[Мобильное приложение Android]
+        Web[Веб-портал для партнёров]
+        Devices[Внешние устройства BLE/ANT+]
     end
+
+    %% Слой доступа
+    subgraph EdgeLayer[Слой доступа]
+        APIGateway[API Gateway (Kong/Envoy) + WAF]
+        BFF[BFF (Backend for Frontend)]
+        RedisCache[Redis (Кеш)]
+    end
+
+    %% Multi-Cloud инфраструктура
+    subgraph MultiCloud[Multi-Cloud Инфраструктура]
+        subgraph RegionA[Регион A (AWS)]
+            K8sA[Kubernetes EKS]
+            ServicesA["Сервисы:<br>Identity<br>User Profile<br>Social<br>Activity Feed<br>Notification"]
+            DataA["Данные:<br>PostgreSQL (OLTP)<br>Elasticsearch (Поиск)<br>Redis (Кеш)"]
+        end
+        subgraph RegionB[Регион B (GCP)]
+            K8sB[Kubernetes GKE]
+            ServicesB["Сервисы:<br>Training<br>Device Integration<br>Gamification<br>Competition<br>Recommendation"]
+            DataB["Данные:<br>TimescaleDB (Time-series)<br>Neo4j (Графовая)<br>Kafka (Event Bus)"]
+        end
+        subgraph RegionC[Регион C (Azure)]
+            K8sC[Kubernetes AKS]
+            ServicesC["Сервисы:<br>Promotion<br>Commerce"]
+            DataC["Данные:<br>DWH / BigQuery (Аналитика)<br>MinIO / S3 (Объектное)"]
+        end
+    end
+
+    %% Мониторинг и наблюдаемость
+    subgraph Observability[Мониторинг и наблюдаемость]
+        Prometheus[Prometheus + Grafana]
+        ELK[ELK Stack (Логи)]
+        Jaeger[Jaeger (Трассировка)]
+        Istio[Service Mesh (Istio/Linkerd)]
+    end
+
+    %% Внешние интеграции
+    subgraph ExternalIntegrations[Внешние интеграции]
+        Legacy[Legacy e-commerce (SOAP/REST)]
+        Payments[Платёжные системы (Stripe/Apple Pay)]
+        Wearable[Wearable APIs (Garmin/Polar/Suunto)]
+        Health[Apple Health / Google Fit]
+        Maps[Картографические сервисы (Mapbox/Google Maps)]
+        Weather[Погодные сервисы]
+    end
+
+    %% Связи клиент → API Gateway
+    iOS --> APIGateway
+    Android --> APIGateway
+    Web --> APIGateway
+    Devices --> APIGateway
+
+    %% API Gateway → BFF → Кеш
+    APIGateway --> BFF
+    APIGateway --> RedisCache
+    BFF --> RedisCache
+
+    %% BFF → Сервисы в регионах
+    BFF --> ServicesA
+    BFF --> ServicesB
+    BFF --> ServicesC
+
+    %% Сервисы → Данные
+    ServicesA --> DataA
+    ServicesB --> DataB
+    ServicesC --> DataC
+
+    %% Kubernetes управляет сервисами
+    K8sA --> ServicesA
+    K8sB --> ServicesB
+    K8sC --> ServicesC
+
+    %% Мониторинг всех сервисов
+    ServicesA --> Prometheus
+    ServicesB --> Prometheus
+    ServicesC --> Prometheus
+    ServicesA --> ELK
+    ServicesB --> ELK
+    ServicesC --> ELK
+    ServicesA --> Jaeger
+    ServicesB --> Jaeger
+    ServicesC --> Jaeger
+    ServicesA --> Istio
+    ServicesB --> Istio
+    ServicesC --> Istio
+
+    %% Внешние интеграции
+    ServicesC --> Legacy
+    ServicesC --> Payments
+    ServicesB --> Wearable
+    ServicesB --> Health
+    ServicesB --> Maps
+    ServicesB --> Weather
 ```
----
+
+
+
 
 # 14.4. Инфраструктурное представление
 
