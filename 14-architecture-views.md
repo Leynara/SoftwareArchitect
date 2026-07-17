@@ -67,6 +67,30 @@
 
 **Легенда:** ✅ — взаимодействие присутствует, — — взаимодействие отсутствует.
 
+```mermaid
+flowchart LR
+    User["Пользователь"] --> App["Mobile App / Web"]
+    App --> APIGW["API Gateway / BFF"]
+
+    APIGW --> Identity["Identity Service"]
+    APIGW --> Profile["User Profile Service"]
+    APIGW --> Training["Training Service"]
+    APIGW --> Social["Social Graph Service"]
+    APIGW --> Feed["Activity Feed Service"]
+    APIGW --> Competition["Competition Service"]
+
+    Training --> Analytics["Analytics / Insights Service"]
+    Training --> Gamification["Gamification Service"]
+    Training --> Recommendation["Recommendation Service"]
+
+    Social --> Feed
+    Gamification --> Notification["Notification Service"]
+    Recommendation --> Commerce["Commerce Integration Service"]
+    Recommendation --> Promotion["Promotion Service"]
+
+    Notification --> App
+    Commerce --> Ecommerce["Existing E-commerce Apps"]
+```
 ---
 
 ## 2. Информационное представление (Information View)
@@ -108,6 +132,403 @@
 | **Регистрация на событие** | Client → Promotion → Commerce | Запрос-ответ | Средняя | < 1 с | Client | Promotion, Commerce |
 | **Участие в челлендже** | Client → Competition → Training | Запрос-ответ | Средняя | < 500 мс | Client | Competition, Training |
 
+erDiagram
+    %% Домен Identity
+    USER ||--|| PROFILE : has
+    USER ||--o{ SESSION : has
+    USER ||--o{ ROLE : assigned
+
+    %% Домен User Profile
+    USER ||--o{ INVENTORY_ITEM : owns
+    USER ||--o{ DEVICE : connects
+
+    %% Домен Training
+    USER ||--o{ WORKOUT : performs
+    WORKOUT ||--o{ WORKOUT_METRICS : contains
+    WORKOUT ||--o{ ROUTE_POINT : has
+    USER ||--o{ RECORD : achieves
+
+    %% Домен Device Integration
+    DEVICE ||--o{ DEVICE_SESSION : creates
+
+    %% Домен Social
+    USER ||--o{ GROUP_MEMBERSHIP : participates
+    GROUP ||--o{ GROUP_MEMBERSHIP : includes
+    USER ||--o{ FRIENDSHIP : friends
+    USER ||--o{ MESSAGE : sends
+    USER ||--o{ MESSAGE : receives
+    USER ||--o{ POST : creates
+    GROUP ||--o{ POST : contains
+    POST ||--o{ COMMENT : has
+    POST ||--o{ REACTION : has
+
+    %% Домен Activity Feed (Post, Comment, Reaction уже покрыты)
+    %% Домен Gamification
+    USER ||--o{ ACHIEVEMENT : unlocks
+    USER ||--o{ LEVEL : has
+    USER ||--o{ VIRTUAL_CURRENCY : holds
+
+    %% Домен Competition
+    USER ||--o{ CHALLENGE_PARTICIPANT : participates
+    CHALLENGE ||--o{ CHALLENGE_PARTICIPANT : includes
+    CHALLENGE ||--o{ WORKOUT : includes
+    COMPETITION ||--o{ CHALLENGE : contains
+    COMPETITION ||--o{ TEAM : has
+
+    %% Домен Recommendation
+    USER ||--o{ TRAINING_PLAN : follows
+    USER ||--o{ RECOMMENDATION : receives
+    RECOMMENDATION ||--o{ INVENTORY_ITEM : suggests
+
+    %% Домен Notification
+    USER ||--o{ NOTIFICATION : receives
+
+    %% Домен Promotion
+    PARTNER ||--o{ PROMOTION : creates
+    PROMOTION ||--o{ RECOMMENDATION : used_in
+    PARTNER ||--o{ EVENT : organizes
+    USER ||--o{ EVENT_REGISTRATION : registers
+
+    %% Домен Commerce
+    USER ||--o{ SUBSCRIPTION : has
+    SUBSCRIPTION ||--o{ PAYMENT : has
+    USER ||--o{ ORDER : places
+    ORDER ||--o{ ORDER_ITEM : contains
+
+    %% Сущности и их атрибуты
+
+    USER {
+        string id PK
+        string email
+        string region
+        string timezone
+        datetime created_at
+        boolean is_active
+    }
+
+    PROFILE {
+        string user_id FK
+        string full_name
+        string sport_level
+        string preferences
+        string privacy_settings
+        float weight
+        float height
+        date birth_date
+    }
+
+    SESSION {
+        string id PK
+        string user_id FK
+        string token
+        datetime created_at
+        datetime expires_at
+        string ip_address
+    }
+
+    ROLE {
+        string id PK
+        string name
+        string permissions
+    }
+
+    INVENTORY_ITEM {
+        string id PK
+        string user_id FK
+        string type
+        string model
+        string brand
+        int usage_distance
+        int threshold
+        date purchase_date
+    }
+
+    DEVICE {
+        string id PK
+        string user_id FK
+        string provider
+        string type
+        string model
+        string last_sync
+        boolean is_active
+    }
+
+    DEVICE_SESSION {
+        string id PK
+        string device_id FK
+        datetime connected_at
+        datetime disconnected_at
+    }
+
+    WORKOUT {
+        string id PK
+        string user_id FK
+        string type
+        datetime started_at
+        datetime finished_at
+        float distance
+        int duration_sec
+        float avg_pace
+        int avg_heart_rate
+    }
+
+    WORKOUT_METRICS {
+        string workout_id FK
+        float pace
+        int heart_rate_avg
+        int heart_rate_max
+        int calories
+        float cadence
+        float power
+    }
+
+    ROUTE_POINT {
+        string workout_id FK
+        float lat
+        float lng
+        float altitude
+        datetime timestamp
+    }
+
+    RECORD {
+        string id PK
+        string user_id FK
+        string type
+        float value
+        datetime achieved_at
+    }
+
+    GROUP {
+        string id PK
+        string name
+        string description
+        string type
+        string location
+        datetime created_at
+    }
+
+    GROUP_MEMBERSHIP {
+        string user_id FK
+        string group_id FK
+        string role
+        datetime joined_at
+    }
+
+    FRIENDSHIP {
+        string user_id FK
+        string friend_id FK
+        string status
+        datetime created_at
+    }
+
+    MESSAGE {
+        string id PK
+        string sender_id FK
+        string receiver_id FK
+        string group_id FK
+        string content
+        datetime sent_at
+        boolean is_read
+    }
+
+    POST {
+        string id PK
+        string user_id FK
+        string group_id FK
+        string content
+        datetime created_at
+        string media_url
+    }
+
+    COMMENT {
+        string id PK
+        string post_id FK
+        string user_id FK
+        string content
+        datetime created_at
+    }
+
+    REACTION {
+        string id PK
+        string post_id FK
+        string user_id FK
+        string type
+    }
+
+    ACHIEVEMENT {
+        string id PK
+        string user_id FK
+        string type
+        string name
+        string description
+        datetime earned_at
+    }
+
+    LEVEL {
+        string user_id FK
+        int level
+        int xp
+        int xp_next
+    }
+
+    VIRTUAL_CURRENCY {
+        string user_id FK
+        int coins
+        int bonus_points
+    }
+
+    CHALLENGE {
+        string id PK
+        string competition_id FK
+        string name
+        string description
+        datetime start_date
+        datetime end_date
+        string type
+        float target_value
+    }
+
+    CHALLENGE_PARTICIPANT {
+        string user_id FK
+        string challenge_id FK
+        string team_id FK
+        float progress
+        datetime joined_at
+    }
+
+    TEAM {
+        string id PK
+        string competition_id FK
+        string name
+        int member_count
+    }
+
+    COMPETITION {
+        string id PK
+        string name
+        datetime start_date
+        datetime end_date
+        string region
+        string type
+    }
+
+    TRAINING_PLAN {
+        string id PK
+        string user_id FK
+        string name
+        datetime generated_at
+        string schedule
+        string goal
+    }
+
+    RECOMMENDATION {
+        string id PK
+        string user_id FK
+        string inventory_item_id FK
+        string type
+        string content
+        datetime created_at
+        boolean is_accepted
+    }
+
+    NOTIFICATION {
+        string id PK
+        string user_id FK
+        string type
+        string content
+        datetime sent_at
+        boolean is_read
+    }
+
+    PARTNER {
+        string id PK
+        string name
+        string region
+        string contact_email
+        string contact_phone
+        datetime registered_at
+    }
+
+    PROMOTION {
+        string id PK
+        string partner_id FK
+        string title
+        string description
+        string region
+        datetime start_date
+        datetime end_date
+        string target_audience
+        float discount
+    }
+
+    EVENT {
+        string id PK
+        string partner_id FK
+        string name
+        datetime date
+        string location
+        string description
+        string registration_url
+    }
+
+    EVENT_REGISTRATION {
+        string user_id FK
+        string event_id FK
+        datetime registered_at
+        string status
+    }
+
+    SUBSCRIPTION {
+        string id PK
+        string user_id FK
+        string tier
+        datetime start_date
+        datetime end_date
+        string status
+    }
+
+    PAYMENT {
+        string id PK
+        string subscription_id FK
+        float amount
+        string currency
+        datetime paid_at
+        string status
+        string transaction_id
+    }
+
+    ORDER {
+        string id PK
+        string user_id FK
+        float total
+        datetime ordered_at
+        string status
+        string shipping_address
+    }
+
+    ORDER_ITEM {
+        string order_id FK
+        string product_sku
+        int quantity
+        float price
+    }
+### Пояснение к ER-диаграмме
+
+- **USER** — центральная сущность, связанная со всеми доменами.
+- **PROFILE** и **SESSION** — расширяют информацию о пользователе и управление сессиями.
+- **INVENTORY_ITEM** и **DEVICE** — отражают инвентарь и подключённые устройства.
+- **WORKOUT**, **WORKOUT_METRICS**, **ROUTE_POINT** — хранят данные тренировок.
+- **RECORD** — личные рекорды пользователя.
+- **GROUP**, **GROUP_MEMBERSHIP**, **FRIENDSHIP**, **MESSAGE**, **POST**, **COMMENT**, **REACTION** — покрывают социальную функциональность.
+- **ACHIEVEMENT**, **LEVEL**, **VIRTUAL_CURRENCY** — реализуют геймификацию.
+- **CHALLENGE**, **CHALLENGE_PARTICIPANT**, **TEAM**, **COMPETITION** — описывают соревнования и челленджи.
+- **TRAINING_PLAN**, **RECOMMENDATION** — обеспечивают AI-рекомендации.
+- **NOTIFICATION** — управляет уведомлениями.
+- **PARTNER**, **PROMOTION**, **EVENT**, **EVENT_REGISTRATION** — закрывают B2B-платформу и промоакции.
+- **SUBSCRIPTION**, **PAYMENT**, **ORDER**, **ORDER_ITEM** — отвечают за монетизацию и интеграцию с e-commerce.
+
+Все домены покрыты, связи обозначены явно (один-к-одному, один-ко-многим, многие-ко-многим через промежуточные таблицы).
+
 ---
 
 ## 3. Представление многозадачности (Concurrency View)
@@ -141,152 +562,9 @@
 
 ## 4. Инфраструктурное представление (Infrastructure View)
 
-**Назначение:** Описывает физическую инфраструктуру, развертывание компонентов, сетевое взаимодействие и среду выполнения в разрезе доменов.
 
----
 
-## Основной функциональный поток
-Тренировка является центральным событием системы:
 
-```text
-Workout completed
-      ↓
-Training Service
-      ↓
-Event Bus
-      ↓
-Analytics / Gamification / Notification / Recommendation
-```
-
-```mermaid
-flowchart LR
-    User["Пользователь"] --> App["Mobile App / Web"]
-    App --> APIGW["API Gateway / BFF"]
-
-    APIGW --> Identity["Identity Service"]
-    APIGW --> Profile["User Profile Service"]
-    APIGW --> Training["Training Service"]
-    APIGW --> Social["Social Graph Service"]
-    APIGW --> Feed["Activity Feed Service"]
-    APIGW --> Competition["Competition Service"]
-
-    Training --> Analytics["Analytics / Insights Service"]
-    Training --> Gamification["Gamification Service"]
-    Training --> Recommendation["Recommendation Service"]
-
-    Social --> Feed
-    Gamification --> Notification["Notification Service"]
-    Recommendation --> Commerce["Commerce Integration Service"]
-    Recommendation --> Promotion["Promotion Service"]
-
-    Notification --> App
-    Commerce --> Ecommerce["Existing E-commerce Apps"]
-```
-
----
-
-# 14.2. Информационное представление
-
-Информационное представление описывает основные данные системы.
-
-## Основные сущности
-
-| Сущность | Описание |
-|---|---|
-| User | Пользователь |
-| Profile | Спортивный профиль |
-| Workout | Тренировка |
-| WorkoutMetrics | Метрики тренировки |
-| Device | Устройство |
-| InventoryItem | Инвентарь |
-| Group | Социальная группа |
-| Challenge | Челлендж |
-| Competition | Соревнование |
-| Achievement | Достижение |
-| Promotion | Промоакция |
-| Recommendation | Рекомендация |
-
-## Классы данных по чувствительности
-
-| Класс | Примеры | Защита |
-|---|---|---|
-| Public | публичные достижения | базовая |
-| Personal | имя, регион | доступ по ролям |
-| Sensitive | здоровье, маршруты | шифрование, аудит |
-| Commercial | промо, заказы | контроль доступа |
-| Operational | логи, метрики | retention policy |
-
-## Подход к хранению
-- транзакционные данные — relational DB;
-- телеметрия — time-series / wide-column;
-- события — event log;
-- аналитика — warehouse;
-- кэш — Redis;
-- социальные связи — graph-like model.
-
-```mermaid
-erDiagram
-    USER ||--|| PROFILE : has
-    USER ||--o{ WORKOUT : performs
-    USER ||--o{ DEVICE : connects
-    USER ||--o{ INVENTORY_ITEM : owns
-    USER ||--o{ ACHIEVEMENT : receives
-    USER ||--o{ RECOMMENDATION : receives
-    USER ||--o{ GROUP_MEMBERSHIP : participates
-
-    GROUP ||--o{ GROUP_MEMBERSHIP : includes
-    WORKOUT ||--o{ WORKOUT_METRICS : contains
-    WORKOUT ||--o{ ROUTE_POINT : has
-    WORKOUT ||--o{ EVENT : produces
-
-    CHALLENGE ||--o{ WORKOUT : includes
-    COMPETITION ||--o{ CHALLENGE : contains
-    PROMOTION ||--o{ RECOMMENDATION : used_in
-
-    USER {
-        string id
-        string email
-        string region
-        string timezone
-    }
-
-    PROFILE {
-        string user_id
-        string sport_level
-        string preferences
-        string privacy_settings
-    }
-
-    WORKOUT {
-        string id
-        string user_id
-        string type
-        datetime started_at
-        datetime finished_at
-    }
-
-    WORKOUT_METRICS {
-        string workout_id
-        float distance
-        float pace
-        int heart_rate
-        int calories
-    }
-
-    DEVICE {
-        string id
-        string user_id
-        string provider
-        string type
-    }
-
-    INVENTORY_ITEM {
-        string id
-        string user_id
-        string type
-        int usage_distance
-    }
-```
 
 ---
 
