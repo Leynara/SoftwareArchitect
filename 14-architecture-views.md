@@ -607,97 +607,99 @@ sequenceDiagram
 
 ```mermaid
 flowchart TB
-    subgraph Клиентский слой
-        iOS[Мобильное приложение iOS]
-        Android[Мобильное приложение Android]
-        Web[Веб-портал для партнёров]
-        Devices[Внешние устройства BLE/ANT+]
+    %% Клиентский слой
+    subgraph ClientLayer["Клиентский слой"]
+        iOS["Мобильное приложение iOS"]
+        Android["Мобильное приложение Android"]
+        Web["Веб-портал для партнёров"]
+        Devices["Внешние устройства BLE/ANT+"]
     end
 
-    subgraph EdgeLayer[Слой доступа]
-        APIGateway[API Gateway (Kong/Envoy) + WAF (Cloudflare/AWS Shield)]
-        BFF[BFF (Backend for Frontend)]
+    %% Слой доступа
+    subgraph EdgeLayer["Слой доступа"]
+        APIGateway["API Gateway (Kong/Envoy) + WAF"]
+        BFF["BFF (Backend for Frontend)"]
+        RedisCache["Redis (Кеш)"]
     end
 
-    subgraph MultiCloud[Multi-Cloud Инфраструктура]
-        subgraph RegionA[Регион A (AWS)]
-            K8sA[Kubernetes EKS]
-            ServicesA["Сервисы:
-            Identity
-            User Profile
-            Social
-            Activity Feed
-            Notification"]
-            DataA["Данные:
-            PostgreSQL (OLTP)
-            Elasticsearch (Поиск)
-            Redis (Кеш)"]
+    %% Multi-Cloud инфраструктура
+    subgraph MultiCloud["Multi-Cloud Инфраструктура"]
+        subgraph RegionA["Регион A (AWS)"]
+            K8sA["Kubernetes EKS"]
+            ServicesA["Сервисы:<br>Identity<br>User Profile<br>Social<br>Activity Feed<br>Notification"]
+            DataA["Данные:<br>PostgreSQL (OLTP)<br>Elasticsearch (Поиск)<br>Redis (Кеш)"]
         end
-        subgraph RegionB[Регион B (GCP)]
-            K8sB[Kubernetes GKE]
-            ServicesB["Сервисы:
-            Training
-            Device Integration
-            Gamification
-            Competition
-            Recommendation"]
-            DataB["Данные:
-            TimescaleDB (Time-series)
-            Neo4j (Графовая)
-            Kafka (Event Bus)"]
+        subgraph RegionB["Регион B (GCP)"]
+            K8sB["Kubernetes GKE"]
+            ServicesB["Сервисы:<br>Training<br>Device Integration<br>Gamification<br>Competition<br>Recommendation"]
+            DataB["Данные:<br>TimescaleDB (Time-series)<br>Neo4j (Графовая)<br>Kafka (Event Bus)"]
         end
-        subgraph RegionC[Регион C (Azure)]
-            K8sC[Kubernetes AKS]
-            ServicesC["Сервисы:
-            Promotion
-            Commerce"]
-            DataC["Данные:
-            DWH / BigQuery (Аналитика)
-            MinIO / S3 (Объектное)"]
+        subgraph RegionC["Регион C (Azure)"]
+            K8sC["Kubernetes AKS"]
+            ServicesC["Сервисы:<br>Promotion<br>Commerce"]
+            DataC["Данные:<br>DWH / BigQuery (Аналитика)<br>MinIO / S3 (Объектное)"]
         end
     end
 
-    subgraph Observability[Мониторинг и наблюдаемость]
-        Prometheus[Prometheus + Grafana]
-        ELK[ELK Stack (Логи)]
-        Jaeger[Jaeger (Трассировка)]
+    %% Мониторинг и наблюдаемость
+    subgraph Observability["Мониторинг и наблюдаемость"]
+        Prometheus["Prometheus + Grafana"]
+        ELK["ELK Stack (Логи)"]
+        Jaeger["Jaeger (Трассировка)"]
+        Istio["Service Mesh (Istio/Linkerd)"]
     end
 
-    subgraph ExternalIntegrations[Внешние интеграции]
-        Legacy[Legacy e-commerce (SOAP/REST)]
-        Payments[Платёжные системы (Stripe/Apple Pay)]
-        Wearable[Wearable APIs (Garmin/Polar/Suunto)]
-        Health[Apple Health / Google Fit]
-        Maps[Картографические сервисы (Mapbox/Google Maps)]
-        Weather[Погодные сервисы]
+    %% Внешние интеграции
+    subgraph ExternalIntegrations["Внешние интеграции"]
+        Legacy["Legacy e-commerce (SOAP/REST)"]
+        Payments["Платёжные системы (Stripe/Apple Pay)"]
+        Wearable["Wearable APIs (Garmin/Polar/Suunto)"]
+        Health["Apple Health / Google Fit"]
+        Maps["Картографические сервисы (Mapbox/Google Maps)"]
+        Weather["Погодные сервисы"]
     end
 
+    %% Связи клиент → API Gateway
     iOS --> APIGateway
     Android --> APIGateway
     Web --> APIGateway
     Devices --> APIGateway
 
+    %% API Gateway → BFF и кеш
     APIGateway --> BFF
+    APIGateway --> RedisCache
+    BFF --> RedisCache
+
+    %% BFF → Сервисы в регионах
     BFF --> ServicesA
     BFF --> ServicesB
     BFF --> ServicesC
 
+    %% Сервисы → Данные
     ServicesA --> DataA
     ServicesB --> DataB
     ServicesC --> DataC
 
+    %% Kubernetes управляет сервисами
     K8sA --> ServicesA
     K8sB --> ServicesB
     K8sC --> ServicesC
 
-    ServicesA --> Observability
-    ServicesB --> Observability
-    ServicesC --> Observability
+    %% Мониторинг всех сервисов
+    ServicesA --> Prometheus
+    ServicesB --> Prometheus
+    ServicesC --> Prometheus
+    ServicesA --> ELK
+    ServicesB --> ELK
+    ServicesC --> ELK
+    ServicesA --> Jaeger
+    ServicesB --> Jaeger
+    ServicesC --> Jaeger
+    ServicesA --> Istio
+    ServicesB --> Istio
+    ServicesC --> Istio
 
-    Observability --> Prometheus
-    Observability --> ELK
-    Observability --> Jaeger
-
+    %% Внешние интеграции (только нужные домены)
     ServicesC --> Legacy
     ServicesC --> Payments
     ServicesB --> Wearable
