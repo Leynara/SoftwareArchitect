@@ -19,7 +19,7 @@ markdown
 ### Этап 1: Утверждение концепта архитектурного решения
 
 | № | Наименование раздела | Ссылка на раздел |
-|:---:|:---|
+|:---:|:---|:---|
 | 1 | Бизнес-цели (Business Goals) | [01-business-goals.md](./01-business-goals.md) |
 | 2 | Анализ и список функциональных требований |
 → [02-functional-requirements.md](./02-functional-requirements.md)
