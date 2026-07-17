@@ -563,7 +563,6 @@ erDiagram
 | **All domains** | Bulkhead (изоляция пулов потоков) | Разделение ресурсов по доменам | Защита от каскадных отказов |
 | **All domains** | Graceful Degradation | Отключение некритичных функций (Recommendation при перегрузке) | При превышении 80% ёмкости |
 
----
 ```mermaid
 sequenceDiagram
     participant App as Mobile App
@@ -600,11 +599,8 @@ sequenceDiagram
         Bus-->>Notify: training.completed / achievement
         Notify-->>App: Push notification
     end
-
+```
 ---
-
----
-
 ## 4. Инфраструктурное представление (Infrastructure View)
 
 
