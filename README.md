@@ -21,47 +21,31 @@ markdown
 | № | Наименование раздела | Ссылка на раздел |
 |:---:|:---|:---|
 | 1 | Бизнес-цели (Business Goals) | [01-business-goals.md](./01-business-goals.md) |
-| 2 | Анализ и список функциональных требований |
-→ [02-functional-requirements.md](./02-functional-requirements.md)
-| 3 | Анализ стейкхолдеров и их интересов |
-→ [03-stakeholders.md](./03-stakeholders.md)
-| 4 | Разработка концептуальной архитектуры |
-→ [04-conceptual-architecture.md](./04-conceptual-architecture.md)
-| 5 | Описание рисков реализации |
-→ [05-risks.md](./05-risks.md)
-| 6 | План поэтапной разработки и расширения системы |
-→ [06-development-plan.md](./06-development-plan.md)
-| 7 | Выделение критических бизнес-сценариев |
-→ [07-business-scenarios.md](./07-business-scenarios.md)
-| 8 | Атрибуты качества |
-→ [08-quality-attributes.md](./08-quality-attributes.md)
-| 9 | Анализ и список нефункциональных требований |
-→ [09-non-functional-requirements.md](./09-non-functional-requirements.md)
-| 10 | Анализ и описание архитектурных опций и обоснование выбора |
-→ [10-architecture-decisions.md](./10-architecture-decisions.md)
+| 2 | Анализ и список функциональных требований | [02-functional-requirements.md](./02-functional-requirements.md) |
+| 3 | Анализ стейкхолдеров и их интересов | [03-stakeholders.md](./03-stakeholders.md) |
+| 4 | Разработка концептуальной архитектуры | [04-conceptual-architecture.md](./04-conceptual-architecture.md) |
+| 5 | Описание рисков реализации | [05-risks.md](./05-risks.md) |
+| 6 | План поэтапной разработки и расширения системы | [06-development-plan.md](./06-development-plan.md) |
+| 7 | Выделение критических бизнес-сценариев | [07-business-scenarios.md](./07-business-scenarios.md) |
+| 8 | Атрибуты качества | [08-quality-attributes.md](./08-quality-attributes.md) |
+| 9 | Анализ и список нефункциональных требований | [09-non-functional-requirements.md](./09-non-functional-requirements.md) |
+| 10 | Анализ и описание архитектурных опций и обоснование выбора | [10-architecture-decisions.md](./10-architecture-decisions.md) |
 
 ### Этап 2: Защита плана реализации
 
 | № | Наименование раздела |
 |:---:|:---|
-| 11 | Список ADR (Architecture Decision Records) |
-→ [11-adr.md](./11-adr.md)
-| 12 | Описание сценариев использования приложения |
-→ [12-use-cases.md](./12-use-cases.md)
-| 13 | Базовая архитектура с учётом ограничений |
-→ [13-base-architecture.md](./13-base-architecture.md)
-| 14 | Основные архитектурные представления (Views) |
-→ [14-architecture-views.md](./14-architecture-views.md)
+| 11 | Список ADR (Architecture Decision Records) | [11-adr.md](./11-adr.md) |
+| 12 | Описание сценариев использования приложения | [12-use-cases.md](./12-use-cases.md) |
+| 13 | Базовая архитектура с учётом ограничений | [13-base-architecture.md](./13-base-architecture.md) |
+| 14 | Основные архитектурные представления (Views) | [14-architecture-views.md](./14-architecture-views.md) |
 
 ### Этап 3: Анализ рисков и стоимости
 
 | № | Наименование раздела |
 |:---:|:---|
-| 15 | Анализ рисков созданной архитектуры, компромиссов |
-→ [15-architecture-risks-tradeoffs.md](./15-architecture-risks-tradeoffs.md)
-
-| 16 | Стоимость владения системой (TCO) |
-→ [16-tco.md](./16-tco.md)
+| 15 | Анализ рисков созданной архитектуры, компромиссов | [15-architecture-risks-tradeoffs.md](./15-architecture-risks-tradeoffs.md) |
+| 16 | Стоимость владения системой (TCO) | [16-tco.md](./16-tco.md) |
 
 ---
 
