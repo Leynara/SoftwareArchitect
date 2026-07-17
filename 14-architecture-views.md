@@ -808,6 +808,20 @@ flowchart TB
 ```
 ---
 
+
+### Описание инфраструктурной схемы развертывания
+
+| Уровень | Компоненты | Назначение |
+|:---|:---|:---|
+| **Клиентский слой** | iOS, Android, Web, BLE/ANT+ | Пользовательские интерфейсы и устройства |
+| **Слой доступа** | API Gateway, BFF, Redis | Единая точка входа, кеширование, агрегация |
+| **Регион A (AWS)** | Identity, User Profile, Social, Activity Feed, Notification; PostgreSQL, Elasticsearch, Redis | Транзакционные и социальные данные |
+| **Регион B (GCP)** | Training, Device Integration, Gamification, Competition, Recommendation; TimescaleDB, Neo4j, Kafka | Трекинг, ML, соревнования, события |
+| **Регион C (Azure)** | Promotion, Commerce; DWH/BigQuery, MinIO/S3 | B2B, аналитика, монетизация |
+| **Мониторинг** | Prometheus, ELK, Jaeger, Istio | Метрики, логи, трассировка, безопасность |
+| **Внешние интеграции** | Legacy e-commerce, платежи, устройства, карты, погода | Интеграция с внешними системами |
+
+**Все связи между компонентами показаны стрелками на схеме.**
 # 14.5. Представление безопасности
 
 ## Основные угрозы
